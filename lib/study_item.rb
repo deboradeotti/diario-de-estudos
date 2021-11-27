@@ -1,79 +1,73 @@
-class StudyItem
-    attr_accessor :title, :category, :done
+require_relative 'category.rb'
 
-    require_relative 'study_diary.rb'
-    require_relative 'category.rb'
+class StudyItem
+    attr_reader :id, :title, :category
+
+    # Variável estática que vale para a classe e para o objeto
+    # Para qualquer instância que chamar essa variável, ela terá o mesmo valor
+    # Dessa forma, podemos guardar em memória qual o próximo índice
+    @@next_index = 1 
+    @@study_items = []
 
     def initialize(title:, category:)
+        @id = @@next_index
         @title = title
         @category = category
         @done = false 
+        @@next_index += 1
+        # Todo objeto criado será inserido no array
+        @@study_items << self
     end
 
-    def self.menu
+    # Métodos com ? têm como padrão retornar true ou false
+    def done?
+        @done
+    end
 
-        # Heredoc: sintaxe para criar múltiplas linhas de texto
-        # <<-HEREDOC -> considera a indentação do texto na hora do output
-        # <<~HEREDOC -> "Squiggly Heredoc" -> não considera a indentação do texto
+    # Métodos com ! -> são chamados de bang methods e possuem algum "efeito colateral"
+    def done!
+        @done = true
+    end
 
-        puts <<~MENU 
-        ---------------------------------------------------------
-        [#{CADASTRAR_ITEM}] Cadastrar um item para estudar
-        [#{VISUALIZAR_ITENS}] Ver todos os itens cadastrados
-        [#{BUSCAR_ITEM}] Buscar um item de estudo
-        [#{SAIR}] Sair
-        ---------------------------------------------------------
-        MENU
-        print "Escolha uma opção: "
-        gets.to_i
+    def undone?
+        !@done
+    end
+
+    # Vamos sobrescrever o método to_s da classe. Assim, quando chamarmos puts em algum objeto StudyItem, ele já virá formatado dessa maneira
+
+    def to_s
+        "##{id} - #{title} - #{category}#{' - Finalizado' if done?}"
+    end
+
+    def include?(term)
+        # Deixando tanto o title quanto o termo em downcase, fazemos com que a busca se torne case insensitive
+        title.downcase.include? term.downcase
     end
       
-    def self.insert_item
+    def self.create
         puts "Digite o título do item: "
-        titulo = gets.chomp
-        puts "Digite a categoria do item: "
-        categoria = gets.chomp
+        title = gets.chomp
+        display_items(Category.all)
+        print "Escolha uma categoria para o seu item: "
+        category = Category.index(gets.to_i - 1)
         puts
-        puts "Item #{titulo} da categoria #{categoria} cadastrado com sucesso."
+        puts "Item #{title} da categoria #{category} cadastrado com sucesso."
         puts
-        return StudyItem.new(titulo: titulo, categoria: categoria)
-    end
-        
-    def self.display_items(collection)
-        puts
-        puts "========== Itens cadastrados =========="
-        itens.each.with_index(1) do |item, index|
-            puts "##{index} - #{item.titulo} - #{item.categoria}#{' - Finalizado' if item.done == true} "
-        end
-        puts
-
-        # Não precisamos usar if/else porque o each já não roda se o array estiver vazio
-        puts "Nenhum item encontrado." if collection.empty?
-        puts
-        wait_and_clear
-    end
-      
-      
-    def self.search_item(collection)
-        puts "Digite o termo que deseja buscar: "
-        term = gets.chomp
-
-        # O filter é um alias do select
-        found_items = collection.filter do |item|
-            item.titulo.include? term
-        end
-        display_items(found_items)
-        wait_and_clear
+        StudyItem.new(titulo: titulo, categoria: categoria)
     end
 
-    def self.mark_as_done
-        not_finalized = StudyItem.undone
-        display_items(not_finalized)
-        return if not_finalized.empty?
-      
-        print 'Digite o número que deseja finalizar: '
-        index = gets.to_i
-        not_finalized[index - 1].done!
+    # Vamos criar um método de classe para pegar todos os ítens criados
+
+    def self.all
+        @@study_items
+    end
+
+    def self.search(term)
+        all.filter { |element| element.include?(term) }
+    end
+
+    def self.undone
+        all.filter(&:undone?)
     end
       
 end
