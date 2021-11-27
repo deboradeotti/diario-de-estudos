@@ -36,10 +36,11 @@ def menu
 
   puts <<~MENU 
   ---------------------------------------------------------
-  [#{CADASTRAR_ITEM}] Cadastrar um item para estudar
-  [#{VISUALIZAR_ITENS}] Ver todos os itens cadastrados
-  [#{BUSCAR_ITEM}] Buscar um item de estudo
-  [#{SAIR}] Sair
+  [#{INSERT}] Cadastrar um item para estudar
+  [#{DISPLAY_ALL}] Ver todos os itens cadastrados
+  [#{SEARCH}] Buscar um item de estudo
+  [#{MARK_AS_DONE}] Marcar um ítem como concluído
+  [#{EXIT}] Sair
   ---------------------------------------------------------
   MENU
   print "Escolha uma opção: "
@@ -47,19 +48,16 @@ def menu
 end
 
 def display_items(collection)
-  puts
-  puts "========== Itens cadastrados ==========" 
   # Quando fazemos o puts de um array, o Ruby entende que é para fazer de cada um dos ítens, então não precisamos do each
   puts collection
   puts
   # Não precisamos usar if/else porque o each já não roda se o array estiver vazio
   puts "Nenhum item encontrado." if collection.empty?
   puts
-  wait_and_clear
 end
 
 def search_item
-  puts "Digite o termo que deseja buscar: "
+  print "Digite o termo que deseja buscar: "
   term = gets.chomp
   StudyItem.search(term)
 end
@@ -68,7 +66,7 @@ def mark_as_done
 
   # & -> operador ampersand
 
-  not_finalized = study_items.filter(&:undone)
+  not_finalized = StudyItem.undone
   display_items(not_finalized)
   return if not_finalized.empty?
 
@@ -79,16 +77,18 @@ end
 
 clear 
 puts 'Bem-vindo ao seu diário de estudos!'
-opcao = menu
+option = menu
 
 loop do
   case option
   when INSERT
     StudyItem.create
   when DISPLAY_ALL
-    display_itens(StudyItem.all)
+    puts "========== Itens cadastrados ==========" 
+    display_items(StudyItem.all)
   when SEARCH
     found_items = search_item
+    puts "========== Itens encontrados =========="
     display_items(found_items)
   when MARK_AS_DONE
     mark_as_done
@@ -99,7 +99,7 @@ loop do
     puts
   end
   wait_and_clear
-  opcao = StudyItem.menu
+  option = menu
 end
 
 puts

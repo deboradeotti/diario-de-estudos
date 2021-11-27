@@ -2,12 +2,16 @@ class Category
 
     attr_reader :title, :id
 
+    @@next_index = 1 
+
     def initialize(title:)
+      @id = @@next_index
       @title = title
+      @@next_index += 1
     end
 
     def to_s
-      title
+      "##{id} - #{title}"
     end
 
     # Vamos criar uma constante dentro da nossa classe com as categorias possíveis

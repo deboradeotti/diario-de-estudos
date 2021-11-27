@@ -45,15 +45,17 @@ class StudyItem
     end
       
     def self.create
-        puts "Digite o título do item: "
+        print "Digite o título do item: "
         title = gets.chomp
+        puts 
+        puts "========== CATEGORIAS =========="
         display_items(Category.all)
         print "Escolha uma categoria para o seu item: "
         category = Category.index(gets.to_i - 1)
         puts
         puts "Item #{title} da categoria #{category} cadastrado com sucesso."
         puts
-        StudyItem.new(titulo: titulo, categoria: categoria)
+        StudyItem.new(title: title, category: category)
     end
 
     # Vamos criar um método de classe para pegar todos os ítens criados
